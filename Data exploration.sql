@@ -14,6 +14,6 @@ SELECT *
 FROM [COVID Project]..CovidDeaths
 
 
-SELECT COUNT(date)
+SELECT SUM(total_deaths)
 FROM [COVID Project]..CovidDeaths
 
