@@ -3,17 +3,22 @@ Exploratory data analysis of COVID deaths and
 COVID Vaccination databases
 */
 
--- Select relevant data
-SELECT location, date, population, total_cases, 
-new_cases, total_deaths
-FROM [COVID Project]..CovidDeaths
-ORDER BY location, date
+-- Checking data uploaded Vaccinations
+SELECT *
+FROM [COVID Project]..CovidVaccinations
+ORDER BY location, date;
 
--- Create death rate
+-- Checking data uploaded Deaths
 SELECT *
 FROM [COVID Project]..CovidDeaths
+ORDER BY location, date;
 
+SELECT location, date, total_cases, new_cases, 
+total_deaths, population
+FROM [COVID Project]..CovidDeaths
+ORDER BY location, date; 
 
-SELECT SUM(total_deaths)
+-- Total cases vs total deaths
+SELECT location, SUM(new_cases)
 FROM [COVID Project]..CovidDeaths
 
