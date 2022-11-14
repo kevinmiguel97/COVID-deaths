@@ -13,12 +13,21 @@ SELECT *
 FROM [COVID Project]..CovidDeaths
 ORDER BY location, date;
 
-SELECT location, date, total_cases, new_cases, 
-total_deaths, population
+-- Calculatin death ratio
+SELECT location, date, total_cases, total_deaths,
+(total_deaths / total_cases) * 100 AS death_ratio
 FROM [COVID Project]..CovidDeaths
-ORDER BY location, date; 
+WHERE location = 'Mexico'
+ORDER BY location, date;
 
--- Total cases vs total deaths
-SELECT location, SUM(new_cases)
-FROM [COVID Project]..CovidDeaths
+-- Total cases vs Population by country
+SELECT location, MAX(total_cases / population) * 100 AS infection_ratio
+FROM [COVID Project]..CovidDeaths 
+GROUP BY location
+ORDER BY infection_ratio DESC; 
 
+-- Ranking countries by death
+SELECT location, MAX(total_deaths) AS max_deaths
+FROM [COVID Project]..CovidDeaths 
+GROUP BY location
+ORDER BY max_deaths DESC; 
