@@ -63,6 +63,7 @@ ORDER BY deaths.location, deaths.date;
 /*
 We cannot perform a calculation on a column created. To obtain % of population vaccinated we use a CTE 
 */
+-- CTE
 WITH CTE_Pop_Vax (continent, location, date, population, new_vaccinations, cumulative_vaccinations)
 AS
 (
@@ -78,3 +79,45 @@ AS
 SELECT *, (cumulative_vaccinations / population) * 100 AS pct_vaccinations
 FROM CTE_Pop_Vax
 ORDER BY location, date
+
+-- Or take the temp table approach 
+DROP TABLE IF EXISTS #temp_pop_vax
+CREATE TABLE #temp_pop_vax
+(
+    continent NVARCHAR(255),
+    location NVARCHAR(255),
+    date DATETIME,
+    population NUMERIC,
+    new_vaccinations NUMERIC,
+    cumulative_vaccinations NUMERIC
+)
+
+INSERT INTO #temp_pop_vax
+SELECT deaths.continent, deaths.location, deaths.date, deaths.population,
+vax.new_vaccinations,
+SUM(vax.new_vaccinations) OVER (PARTITION BY deaths.location ORDER BY deaths.date) AS cumulative_vaccinations
+FROM [COVID Project]..CovidDeaths as deaths
+JOIN [COVID Project]..CovidVaccinations as vax
+    ON deaths.location = vax.location 
+    AND deaths.date = vax.date
+    WHERE deaths.continent IS NOT NULL
+
+SELECT *, (cumulative_vaccinations / population) * 100 AS pct_vaccinated
+FROM #temp_pop_vax
+ORDER BY location, date
+
+-- Creating view to store data for later visualizations
+CREATE VIEW PercentPopVaccinated AS
+SELECT deaths.continent, deaths.location, deaths.date, deaths.population,
+vax.new_vaccinations,
+SUM(vax.new_vaccinations) OVER (PARTITION BY deaths.location ORDER BY deaths.date) AS cumulative_vaccinations
+FROM [COVID Project]..CovidDeaths as deaths
+JOIN [COVID Project]..CovidVaccinations as vax
+    ON deaths.location = vax.location 
+    AND deaths.date = vax.date
+WHERE deaths.continent IS NOT NULL
+
+
+-- Visualizing view
+SELECT *, (cumulative_vaccinations / population) * 100 AS pct_vaccinated
+FROM  PercentPopVaccinated
